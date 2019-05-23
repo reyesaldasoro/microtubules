@@ -1,5 +1,6 @@
-function [cellBody,cellNuclei]= segment_Cell_Nuclei(dataIn)
-
+function [cellBody,cellNuclei,AllCells]= segment_Cell_Nuclei(dataIn)
+% function [cellBody,cellNuclei]= segment_Cell_Nuclei(dataIn)
+%
 % segmentation process, first do an initial thresholding with otsu of the
 % green channel, that will coarsely identify where the cells are, then use
 % that as a mask to get regions where there can be nuclei, everything else,
@@ -10,7 +11,7 @@ function [cellBody,cellNuclei]= segment_Cell_Nuclei(dataIn)
 % nuclei. 
 %% Find an initial segmentation of the cell bodies, they may be merged
 channel_2                               = (dataIn(:,:,2));          % select the second level of the 3D matrix
-[rows,cols]                             =size(channel_2);
+[rows,cols]                             = size(channel_2);
 % filter to obtain a slightly better segmentation
 sizeFilter                              = 5;
 channel_2F                              = imfilter((channel_2),gaussF(sizeFilter,sizeFilter,1),'replicate');
@@ -44,7 +45,7 @@ cellBody_4P                             = regionprops(cellBody_4,'Area','Boundin
 channel_1                               = (dataIn(:,:,1));%.*uint8(cellBody_4));          % select the first  level of the 3D matrix
 
 nuclei_1(rows,cols)                     = 0;
-level_1(numLargeCells)               = 0;
+level_1(numLargeCells)                  = 0;
 for counterSegments=1:numLargeCells
     rowsRegion                          = max(1,floor(cellBody_4P(counterSegments).BoundingBox(2))):min(rows,floor(cellBody_4P(counterSegments).BoundingBox(2))+cellBody_4P(counterSegments).BoundingBox(4));
     colsRegion                          = max(1,floor(cellBody_4P(counterSegments).BoundingBox(1))):min(cols,floor(cellBody_4P(counterSegments).BoundingBox(1))+cellBody_4P(counterSegments).BoundingBox(3));
@@ -204,3 +205,4 @@ end
 %%
 cellBody                                = cellBody_5;
 cellNuclei                              = nuclei_4;
+AllCells                                = cellBody_2;
