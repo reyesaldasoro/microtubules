@@ -13,10 +13,11 @@ if isa(dataIn,'char')
     % Assume for now that it is an 4-dimensional TIFF File [rows,cols,levs,NUM_Timepoints]   
     dataInName                              = dataIn;
     dataIn                                  = readMTIFF(dataInName);
-else
-    if ~exist('dataInName','var')
-        dataInName                              = 'currentFileName.tif';
-    end
+end
+
+% Verify that there is a name
+if ~exist('dataInName','var')
+    dataInName                              = 'currentFileName.tif';
 end
 
 %verify that the distance has been set
@@ -28,8 +29,8 @@ end
 [rows,cols,levs,timePoints]                 = size(dataIn);
 
 %%
-% if the data is 4D, then cycle over the timePoints
-
+% if the data is 4D, then cycle over the timePoints otherwise process only
+% the current time point
 if timePoints>1
     dataIn4D                                = dataIn;
     segmentedData(rows,cols,timePoints)     = 0;
@@ -65,7 +66,7 @@ if timePoints>1
                         
         disp(strcat('Processing time point =',num2str(counterTime),'/',num2str(timePoints)));
         %[segmentedData(:,:,counterTime),microTubules_L(:,:,counterTime),dataOut(:,:,:,counterTime),dataOut2(:,:,:,counterTime)] = segmentMicrotubules(dataIn4D(:,:,:,counterTime),distanceThreshold);
-        [microTubules,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn4D(:,:,:,counterTime),distanceThreshold);
+        [microTubules,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn4D(:,:,:,counterTime),dataInName,distanceThreshold);
         dataFileName                        = strcat(dataOutName0(1:end-floor(log10(counterTime))),num2str(counterTime));
         %dataOutName1            = strcat(dataOutFolder,dataOutName);
         %--------------------------------------------------------------------------
@@ -82,6 +83,7 @@ if timePoints>1
     end
     
 else
+    % the data is not 4D, it can be 2D or 3D.
     if levs==3
         %% PERFORM SEGMENTATION OF THE NUCLEI AND THE CELLS 
         % WITH OTSU AND MORPHOLOGICAL OPERATORS
@@ -111,9 +113,6 @@ else
         disp('Error: Data should be colour images with Nuclei=Red, Tubules=Green');
         return;
     end
-   
-    
-
 end
 %%
 function [D_CT,D_CC,D_TUBULES,dataOut,dataOut2]=calculateDistanceTubulesCell(numNuclei,assignedNuclei,finalCells,distFromCell,microTubules_L,distanceThreshold,dataIn)
