@@ -24,6 +24,11 @@ switch nargin
             if (strcmp(dataInName(end-2:end),'tif'))||(strcmp(dataInName(end-3:end),'tiff'))
                 try
                     numImages                   = numel(imfinfo(dataInName));
+                    % Read first for dimensions
+                    firstImage                  = imread(dataInName,1);
+                    [rows,cols,levs]            = size(firstImage);
+                    % initialise dataIn
+                    dataIn(rows,cols,levs,numImages) = 0;
                     for counterImages =1:numImages
                         disp(strcat('Reading image',32,num2str(counterImages),32,'/',32,num2str(numImages)))
                         dataIn(:,:,:,counterImages) = imread(dataInName,counterImages);
