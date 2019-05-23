@@ -1,5 +1,7 @@
-function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,dataInName,distanceThreshold)
-%function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,dataInName,distanceThreshold)
+function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,distanceThreshold)
+%function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,distanceThreshold)
+% This function is called from another function thus it will be assumed
+% that the data is passed as a 3D matlab matrix. 
 
 %% Parse input
 if nargin<1
@@ -7,19 +9,6 @@ if nargin<1
     segmentedData=[];
     return
 end
-
-if isa(dataIn,'char')
-    %data has been received as the name of the file to be processed,
-    % Assume for now that it is an 4-dimensional TIFF File [rows,cols,levs,NUM_Timepoints]   
-    dataInName                              = dataIn;
-    dataIn                                  = readMTIFF(dataInName);
-end
-
-% Verify that there is a name
-if ~exist('dataInName','var')
-    dataInName                              = 'currentFileName.tif';
-end
-
 %verify that the distance has been set
 if ~exist('distanceThreshold','var')
     distanceThreshold                       = 15;
@@ -32,58 +21,11 @@ end
 % if the data is 4D, then cycle over the timePoints otherwise process only
 % the current time point
 if timePoints>1
-    dataIn4D                                = dataIn;
-    segmentedData(rows,cols,timePoints)     = 0;
-    microTubules_L(rows,cols,timePoints)    = 0;
-    dataOut(rows,cols,levs,timePoints)      = 0;
-    dataOut2(rows,cols,levs,timePoints)     = 0;
-    
-    % Name to be used to save the files in order with a number of zeros before the
-    % number identifier
-    dataOutName0                            = 'T0000';
-    % Create Folders where the data will be saved as individualt time
-    % points and in Matlab format
-    dataFolder1                             = strcat(dataInName(1:end-4),'_mat_Or',filesep);
-    dataFolder2                             = strcat(dataInName(1:end-4),'_mat_La',filesep);
-    dataFolder3                             = strcat(dataInName(1:end-4),'_mat_Tu',filesep);
-    [statF1,messF1,messIDF1]                = mkdir(dataFolder1);
-    [statF2,messF2,messIDF2]                = mkdir(dataFolder2);
-    [statF3,messF3,messIDF3]                = mkdir(dataFolder3);
-    if ~isempty(messF1)
-        %remove files from folder
-        delete(strcat(dataFolder1,'*.*'));
-    end
-    if ~isempty(messF2)
-        %remove files from folder
-        delete(strcat(dataFolder2,'*.*'));
-    end
-    if ~isempty(messF3)
-        %remove files from folder
-        delete(strcat(dataFolder3,'*.*'));
-    end
-            
-    for counterTime = 1:timePoints  
-                        
-        disp(strcat('Processing time point =',num2str(counterTime),'/',num2str(timePoints)));
-        %[segmentedData(:,:,counterTime),microTubules_L(:,:,counterTime),dataOut(:,:,:,counterTime),dataOut2(:,:,:,counterTime)] = segmentMicrotubules(dataIn4D(:,:,:,counterTime),distanceThreshold);
-        [microTubules,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn4D(:,:,:,counterTime),dataInName,distanceThreshold);
-        dataFileName                        = strcat(dataOutName0(1:end-floor(log10(counterTime))),num2str(counterTime));
-        %dataOutName1            = strcat(dataOutFolder,dataOutName);
-        %--------------------------------------------------------------------------
-        %----- the images read are saved to a file HERE ---------------------------
-        %----- the original data is saved as matlab
-        dataIn                              = dataIn4D(:,:,:,counterTime);
-        save(strcat(dataFolder1,dataFileName),'dataIn');
-        %----- the Nuclei are saved as labelled data to be tracked separately
-        dataL                               = bwlabel(microTubules==1);
-        save(strcat(dataFolder2,dataFileName),'dataL');
-        %----- all the segmentation: Cells, nuclei, tubules as a single image
-        save(strcat(dataFolder3,dataFileName),'microTubules');
-                                
-    end
-    
+    help segmentMicrotubules;
+    segmentedData=[];
+    return
 else
-    % the data is not 4D, it can be 2D or 3D.
+    % the data is not 4D, it has to be 3D as in [R,G,B].
     if levs==3
         %% PERFORM SEGMENTATION OF THE NUCLEI AND THE CELLS 
         % WITH OTSU AND MORPHOLOGICAL OPERATORS
