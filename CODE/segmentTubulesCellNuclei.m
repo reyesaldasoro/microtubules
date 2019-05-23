@@ -48,7 +48,7 @@ for k=1:numEdges
         BW5(rr,cc) = BW5(rr,cc) + imclose(BW3(rr,cc)==k,ones(3));
            
     end
- imagesc(BW5)
+% imagesc(BW5)
 end
 %%
 BW6 = BW5 - BW2;
@@ -68,7 +68,7 @@ BW9B             =(ismember(BW7,find([BW8.Eccentricity]>0.96))).*(ismember(BW7,f
 BW10             = bwdist(BW9A + BW9B);
 BW11            = unique(BW7.*(BW10<3));
 BW12            = ismember(BW7,BW11(2:end));
-BW13            = imclose(BW12,ones(3));
+BW13            = imclose(BW12,ones(1));
 
 %imagesc((BW7>0)+(BW13))
 cellTubules         = BW13;
