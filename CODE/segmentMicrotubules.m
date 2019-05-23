@@ -33,7 +33,7 @@ else
      
         %cellNuclei                              = segmentNuclei(dataIn);
         %cellBody                            = segmentCellBody(dataIn,cellNuclei);
-        [cellBody,cellNuclei]               = segment_Cell_Nuclei(dataIn);
+        [cellBody,cellNuclei,AllCells]      = segment_Cell_Nuclei(dataIn);
         [cellNuclei_L,numNuclei]            = bwlabel(cellNuclei);
         [cellBody_L,numCells]               = bwlabel(cellBody);
 %%        
