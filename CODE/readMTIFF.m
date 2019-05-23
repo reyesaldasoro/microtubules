@@ -28,7 +28,7 @@ switch nargin
                     firstImage                  = imread(dataInName,1);
                     [rows,cols,levs]            = size(firstImage);
                     % initialise dataIn
-                    dataIn(rows,cols,levs,numImages) = 0;
+                    dataIn(rows,cols,levs,numImages) = uint8(0);
                     for counterImages =1:numImages
                         disp(strcat('Reading image',32,num2str(counterImages),32,'/',32,num2str(numImages)))
                         dataIn(:,:,:,counterImages) = imread(dataInName,counterImages);
