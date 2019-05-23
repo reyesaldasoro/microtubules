@@ -1,6 +1,6 @@
 function [cellBody,cellNuclei,cellTubules]=segmentTubulesCellNuclei(dataIn)
 
-[rows,cols,levs,]                        = size(dataIn);
+[rows,cols,levs,timeFrames]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
 sizeFilter                              = 5;
 filtG                                   = gaussF(sizeFilter,sizeFilter,1);
