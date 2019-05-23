@@ -1,7 +1,10 @@
 function [dataIn]=readMTIFF(dataInName)
+% function [dataIn]=readMTIFF(dataInName)
+% 
+% Read a multi-frame TIFF file and save as a single Matlab matrix called
+% dataIn
 
 %% Parse input
-
 switch nargin
     case 0
         %----- no data received, Open question dialog and pass to next section to analyse
@@ -14,7 +17,6 @@ switch nargin
             dataIn=[];
             return;
         end
-        
     case 1
         %----- one argument received, it can be a char of a matlab name or a folder
         if isa(dataInName,'char')
@@ -26,18 +28,14 @@ switch nargin
                         dataIn(:,:,:,counterImages) = imread(dataInName,counterImages);
                     end
                 catch
-                    disp('Could not read Multiple TIFF file')
-                    
+                    disp('Could not read Multiple TIFF file')                    
                 end
             else
                 disp('Could not read Multiple TIFF file')
                 dataIn=[];
-                
-                
             end
         else
-            dataIn=[];
-            
+            dataIn=[];            
         end
 end
 end
