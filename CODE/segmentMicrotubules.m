@@ -1,5 +1,12 @@
-function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,distanceThreshold)
+function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,dataInName,distanceThreshold)
+%function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,dataInName,distanceThreshold)
 
+%% Parse input
+if nargin<1
+    help segmentMicrotubules;
+    segmentedData=[];
+    return
+end
 
 if isa(dataIn,'char')
     %data has been received as the name of the file to be processed,
@@ -7,7 +14,9 @@ if isa(dataIn,'char')
     dataInName                              = dataIn;
     dataIn                                  = readMTIFF(dataInName);
 else
-    dataInName                              = 'currentFileName.tif';
+    if ~exist('dataInName','var')
+        dataInName                              = 'currentFileName.tif';
+    end
 end
 
 %verify that the distance has been set
