@@ -1,4 +1,4 @@
-function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,distanceThreshold)
+function [segmentedData,microTubules_L,dataOut,dataOut2,AllCells] = segmentMicrotubules(dataIn,distanceThreshold)
 %function [segmentedData,microTubules_L,dataOut,dataOut2] = segmentMicrotubules(dataIn,distanceThreshold)
 % This function is called from another function thus it will be assumed
 % that the data is passed as a 3D matlab matrix. 
