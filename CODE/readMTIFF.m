@@ -25,6 +25,7 @@ switch nargin
                 try
                     numImages                   = numel(imfinfo(dataInName));
                     for counterImages =1:numImages
+                        disp(strcat('Reading image',32,num2str(counterImages),32,'/',32,num2str(numImages)))
                         dataIn(:,:,:,counterImages) = imread(dataInName,counterImages);
                     end
                 catch
