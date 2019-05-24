@@ -19,15 +19,15 @@ else
 end
 
 %% Read data and process with segmentMicrotubules
- =readMTIFF('datasets/pair1.tif');
-
+%dataIn =readMTIFF('datasets/pair1.tif');
+dataIn =readMTIFF('datasets/2012_11_20_3.tif');
 
 %%
-
-[segmentedData,microTubules,dataOut,dataOut2]=segmentMicrotubules('datasets/pair1.tif');
+tic;[cellBody,cellNuclei,cellTubules]               =segmentTubulesCellNuclei(dataIn);toc
+tic;[segmentedData,microTubules,dataOut,dataOut2]   =segmentMicrotubules(dataIn);toc
 %%
 
-b =readMTIFF('datasets/2012_11_20_3.tif');
+
 %%
 a=b;
 [segmentedData,microTubules,dataOut,dataOut2]=segmentMicrotubules(a(:,:,:,68));
