@@ -22,12 +22,91 @@ end
 %dataIn =readMTIFF('datasets/pair1.tif');
 dataIn =readMTIFF('datasets/2012_11_20_3.tif');
 
+
+%%
+jet4 = [         0         0    0
+         0         0    0.6354
+         0         0    0.7083
+         0         0    0.7812
+         0         0    0.8542
+         0         0    0.9271
+         0         0    1.0000
+         0    0.2000    1.0000
+         0    0.4000    1.0000
+         0    0.6000    1.0000
+         0    0.8000    1.0000
+         0    1.0000    1.0000
+    0.2500    1.0000    0.7500
+    0.5000    1.0000    0.5000
+    0.7500    1.0000    0.2500
+    1.0000    1.0000         0
+    1.0000    0.8333         0
+    1.0000    0.6667         0
+    1.0000    0.5000         0
+    1.0000    0.3333         0
+    1.0000    0.1667         0
+    1.0000         0         0
+    0.9881         0         0
+    0.9762         0         0
+    0.9643         0         0
+    0.9524         0         0
+    0.9405         0         0
+    0.9286         0         0
+    0.9167         0         0
+    0.9048         0         0
+    0.8929         0         0
+    0.8810         0         0
+    0.8690         0         0
+    0.8571         0         0
+    0.8452         0         0
+    0.8333         0         0
+    0.8214         0         0
+    0.8095         0         0
+    0.7976         0         0
+    0.7857         0         0
+    0.7738         0         0
+    0.7619         0         0
+    0.7500         0         0
+    0.7381         0         0
+    0.7262         0         0
+    0.7143         0         0
+    0.7024         0         0
+    0.6905         0         0
+    0.6786         0         0
+    0.6667         0         0
+    0.6548         0         0
+    0.6429         0         0
+    0.6310         0         0
+    0.6190         0         0
+    0.6071         0         0
+    0.5952         0         0
+    0.5833         0         0
+    0.5714         0         0
+    0.5595         0         0
+    0.5476         0         0
+    0.5357         0         0
+    0.5238         0         0
+    0.5119         0         0
+    0.5000         0         0];
+
+
 %%
 tic;[cellBody,cellNuclei,cellTubules]               =segmentTubulesCellNuclei(dataIn);toc
 tic;[segmentedData,microTubules,dataOut,dataOut2]   =segmentMicrotubules(dataIn);toc
 %%
 
+%figure
+subplot(131)
+imagesc(dataIn(:,:,2,1))
+colormap(jet4)
 
+subplot(132)
+imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(cellTubules,ones(2)))))
+colormap(jet4)
+
+subplot(133)
+imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(microTubules,ones(2)))))
+colormap(jet4)
 %%
 a=b;
 [segmentedData,microTubules,dataOut,dataOut2]=segmentMicrotubules(a(:,:,:,68));
