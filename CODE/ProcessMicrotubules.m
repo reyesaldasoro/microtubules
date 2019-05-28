@@ -101,7 +101,7 @@ imagesc(dataIn(:,:,2,1))
 colormap(jet4)
 
 subplot(132)
-imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(cellTubules,ones(2)))))
+imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(cellTubules+ zerocross(cellBody),ones(2)))))
 colormap(jet4)
 
 subplot(133)
