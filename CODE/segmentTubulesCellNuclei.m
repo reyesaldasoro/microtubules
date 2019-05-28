@@ -57,7 +57,7 @@ cellBody_4P                             = regionprops(cellBody_4L,'Area','Convex
 % The combination for a hollow cell is that 1) it has a solidity below 0.8
 % 2) it is not too large nor too small ( 700-2000) is not too elongated
 % eccentricity < 0.9 and only one nucleus
-imagesc(cellBody_4E)
+%imagesc(cellBody_4E)
 
 %%
 cellBody_4R = cellBody_4L;%zeros(rows,cols);
@@ -69,7 +69,7 @@ for k=1:numel(cellBody_4EP)
             if (cellBody_4EP(k).Area>500)
                 if (cellBody_4EP(k).Eccentricity<0.95)
                     if (sum(nucleiPresent==k)==1)
-                        disp(k)
+                        %disp(k)
                         rr = max(1,ceil(cellBody_4P(k).BoundingBox(2))):min(rows,floor(cellBody_4P(k).BoundingBox(2)+cellBody_4P(k).BoundingBox(4)));
                         cc = max(1,ceil(cellBody_4P(k).BoundingBox(1))):min(cols,floor(cellBody_4P(k).BoundingBox(1)+cellBody_4P(k).BoundingBox(3)));
                         
@@ -97,13 +97,13 @@ cellBody                                = cellBody_6;
 %imagesc(cellBody+2*cellNuclei)
 %% Prepare for the tubules
 
-BW                                      = edge((uint8(1-cellBody_3).*channel_2),'canny',[],1);
-BW2                                     = regionCells.*(BW.*imerode((1-cellBody_3),ones(3)));
+BW                                      = edge((uint8(1-cellBody).*channel_2),'canny',[],0.75);
+BW2                                     = regionCells.*(BW.*imerode((1-cellBody),ones(3)));
 [BW3,numEdges]                          = bwlabel(BW2);
 BW4 = regionprops(BW3,channel_2,'Area',...
     'MajoraxisLength','MinoraxisLength',...
     'Eccentricity','Euler','MaxIntensity','BoundingBox');
-
+imagesc(BW)
 %%
 BW5 = zeros(rows,cols);
 %%
