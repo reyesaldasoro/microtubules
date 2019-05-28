@@ -1,5 +1,5 @@
 function [cellBody,cellNuclei,cellTubules]=segmentTubulesCellNuclei(dataIn)
-
+%%
 [rows,cols,levs,timeFrames]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
 sizeFilter                              = 5;
@@ -16,20 +16,46 @@ level_2                                 = 255* graythresh(channel_2F);
 level_1                                 = 255* graythresh(channel_1F);
 
 
-% CELL BODY
-cellBody_1F                             = channel_2F>(0.75*level_2);
-cellBody_2                              = imfill(cellBody_1F,'holes');
-cellBody_3                              = imopen(cellBody_2,ones(6));
-cellBody_4                              = bwdist(cellBody_3);
-cellBody                              = (cellBody_4)<60;
-
 % Nuclei
 cellNuclei                              = (channel_1F>(0.75*level_1));
 
+% CELL BODY
+% Segment by intensity
+cellBody_1F                             = channel_2F>(0.95*level_2);
+% Fill in the holes of the cells
+cellBody_2                              = imfill(cellBody_1F| imdilate(cellNuclei,strel('disk',3)),'holes');
+cellBody_2L                             = bwlabel(cellBody_2);
+cellBody_2P                             = regionprops(cellBody_2L,'Area','ConvexHull','ConvexImage');
+
+cellBody_3                              = ismember(cellBody_2L,find([cellBody_2P.Area]>200));
+cellBody_3P                             = regionprops(cellBody_3,'Area','ConvexHull','ConvexImage','BoundingBox');
+%%
+cellBody_3R = zeros(rows,cols);
+
+for k=1:numel(cellBody_3P)
+%k=17;
+    
+        %disp(k)
+        rr = max(1,ceil(cellBody_3P(k).BoundingBox(2))):min(rows,floor(cellBody_3P(k).BoundingBox(2)+cellBody_3P(k).BoundingBox(4)));
+        cc = max(1,ceil(cellBody_3P(k).BoundingBox(1))):min(cols,floor(cellBody_3P(k).BoundingBox(1)+cellBody_3P(k).BoundingBox(3)));
+        
+        cellBody_3R(rr,cc) = cellBody_3R(rr,cc) + cellBody_3P(k).ConvexImage;
+           
+
+% imagesc(BW5)
+end
+%%
+%cellBody_3                              = imopen(cellBody_2,ones(3));
+cellBody_4                              = bwdist(cellBody_3);
+cellBody_5                              = (cellBody_4)<60;
+
+cellBody                                = cellBody_3;
+
+imagesc(cellBody_3+2*cellNuclei)
 %%
 
 BW                                      = edge((uint8(1-cellBody_3).*channel_2),'canny',[],1);
-BW2                                     = cellBody.*(BW.*imerode((1-cellBody_3),ones(3)));
+BW2                                     = cellBody_5.*(BW.*imerode((1-cellBody_3),ones(3)));
 [BW3,numEdges]                          = bwlabel(BW2);
 BW4 = regionprops(BW3,channel_2,'Area',...
     'MajoraxisLength','MinoraxisLength',...
