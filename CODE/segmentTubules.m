@@ -5,22 +5,61 @@ function [cellTubules]=segmentTubulesCellNuclei(dataIn,cellBody,cellNuclei,cellP
 sizeFilter                              = 5;
 filtG                                   = gaussF(sizeFilter,sizeFilter,1);
 
+%% Find an initial segmentation of the cell bodies, they may be merged
+currentData                             = dataIn(:,:,:,1);
+channel_1                               = (currentData(:,:,1));          % select the first  level of the 3D matrix
+channel_2                               = (currentData(:,:,2));          % select the second level of the 3D matrix
+channel_1F                              = imfilter((channel_1),filtG,'replicate');
+channel_2F                              = imfilter((channel_2),filtG,'replicate');
 %%
-%cellBody_3                              = imopen(cellBody_2,ones(3));
-distFromCells                              = bwdist(cellBody);
-regionCells                              = (distFromCells)<60;
+% Otsu threshold
+level_2                                 = 255* graythresh(channel_2F);
+level_1                                 = 255* graythresh(channel_1F);
 
+
+%% Only calculate the edges OUTSIDE the cells and close to them
+%cellBody_3                              = imopen(cellBody_2,ones(3));
+distFromCells                           = bwdist(cellBody);
+regionCells                             = (distFromCells)<55;
+regionEdges                             = regionCells-imdilate(cellBody,ones(5));
 
 %imagesc(cellBody+2*cellNuclei)
 %% Prepare for the tubules
+% Detect the edges
+BW                                      = edge(channel_2,'canny',[],0.75);
+% remove all those that are far from the cells or on the cells themselves
+BW2                                     = regionEdges.*(BW);
+% find endpoints of the edges to connect those that are separated as in 1 1
+% 1 0 1 1 1
+BW2_endp                                = (bwmorph(BW2,'endpoints'));
+% Now bridge between the endpoints, this is better than closing or dilating
+% as only connections between end points are formed.
+BW2_endp_b                              = (bwmorph(BW2_endp,'bridge'));
+% Dilate with a cross and then apply a majority, single edges will stay the
+% same, but those tha are close will become a H and will keep the bridge
+BW2_endp_d                              = imdilate(BW2_endp,[0 1 0;1 1 1;0 1 0]);
+BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
 
-BW                                      = edge((uint8(1-cellBody).*channel_2),'canny',[],0.75);
-BW2                                     = regionCells.*(BW.*imerode((1-cellBody),ones(3)));
+%BW                                      = edge((uint8(1-cellBody).*channel_2),'canny',[],0.75);
+%BW2                                     = regionCells.*(BW.*imerode((1-cellBody),ones(3)));
+% BW2_endp_1                              = imclose(BW2_endp,[1 1 1]);
+% BW2_endp_2                              = imclose(BW2_endp,[1 1 1]');
+% BW2_endp_3                              = imclose(BW2_endp,[1 0;0 1;0 1 ]');
+% BW2_endp_4                              = imclose(BW2_endp,[1 0;1 0;0 1 ]');
+% BW2_endp_3                              = imclose(BW2_endp,[0 1 1;1 1 1 ]);
+% BW2_endp_4                              = imclose(BW2_endp,[1 1 0;1 1 1 ]);
+% 
+% BW2_endp_5                              = -BW2_endp+ (BW2_endp_1|BW2_endp_2|BW2_endp_3|BW2_endp_4) ;
+
+
+
+%BW2_endp_3                                = imopen(BW2_endp_2,[0 1 0;1 1 1;0 1 0]);
+
 [BW3,numEdges]                          = bwlabel(BW2);
 BW4 = regionprops(BW3,channel_2,'Area',...
     'MajoraxisLength','MinoraxisLength',...
     'Eccentricity','Euler','MaxIntensity','BoundingBox');
-imagesc(BW)
+%imagesc(BW)
 %%
 BW5 = zeros(rows,cols);
 %%
