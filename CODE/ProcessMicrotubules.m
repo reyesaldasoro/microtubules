@@ -93,14 +93,17 @@ jet4 = [ 0         0    0
 %%
 tic;[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 %%
-k=57;
+k=3;
 [cellBody,cellNuclei,cellProtrusions]               =segmentCellNuclei(dataIn(:,:,:,k));
-subplot(121)
+[cellTubules]=segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
+subplot(131)
 imagesc(dataIn(:,:,:,k))
 
-subplot(122)
+subplot(132)
 imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei-cellBody),ones(3)))))
 colormap(jet4)
+subplot(133)
+imagesc(cellNuclei+cellBody+0.3*cellProtrusions+0.5*cellTubules)
 
 
 
