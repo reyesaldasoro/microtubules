@@ -70,15 +70,19 @@ for k=1:numel(cellBody_4EP)
                 if (cellBody_4EP(k).Eccentricity<0.95)
                     if (sum(nucleiPresent==k)==1)
                         %disp(k)
-                        rr = max(1,ceil(cellBody_4P(k).BoundingBox(2))):min(rows,floor(cellBody_4P(k).BoundingBox(2)+cellBody_4P(k).BoundingBox(4)));
-                        cc = max(1,ceil(cellBody_4P(k).BoundingBox(1))):min(cols,floor(cellBody_4P(k).BoundingBox(1)+cellBody_4P(k).BoundingBox(3)));
+                        rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
+                        cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
                         
-                        cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + cellBody_4P(k).ConvexImage;
-                        
+                        cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + cellBody_4EP(k).ConvexImage;
                     end
-                    
                 end
             end
+        else
+                                    rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
+                        cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
+
+
+            cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + imfill(imclose(cellBody_4L(rr,cc),strel('disk',(5))),'holes');
         end
     end
 end
