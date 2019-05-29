@@ -1,4 +1,4 @@
-function [cellBody,cellNuclei]=segmentTubulesCellNuclei(dataIn)
+function [cellBody,cellNuclei,cellProtrusions]=segmentTubulesCellNuclei(dataIn)
 %%
 [rows,cols,levs,timeFrames]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
@@ -88,12 +88,16 @@ for k=1:numel(cellBody_4EP)
 end
 cellBody_5                              = cellBody_4R>0;
 %% Remove stems that are themselves tubules
-cellBody_6                             = imopen(cellBody_5,strel('disk',5));
+cellBody_6                             = bwlabel(imopen(cellBody_5,strel('disk',5)));
+cellBody_6P                             = regionprops(cellBody_6,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
 
+cellBody_7                              = ismember(cellBody_6,find([cellBody_6P.Area]>400));
 
 %%
 
 
-cellBody                                = cellBody_6;
-
+cellBody                                = cellBody_7;
+cellProtrusions_1                         = bwlabel(cellBody_5-cellBody_7);
+cellProtrusions_P                            = regionprops(cellProtrusions_1,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity','majoraxislength');
+cellProtrusions                              = ismember(cellProtrusions_1,find([cellProtrusions_P.MajorAxisLength]>10));
 %imagesc(cellBody+2*cellNuclei)
