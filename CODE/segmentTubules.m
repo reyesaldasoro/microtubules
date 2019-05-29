@@ -38,8 +38,8 @@ BW2_endp                                = (bwmorph(BW2,'endpoints'));
 BW2_endp_b                              = (bwmorph(BW2_endp,'bridge'));
 % Dilate with a cross and then apply a majority, single edges will stay the
 % same, but those tha are close will become a H and will keep the bridge
-BW2_endp_d                              = imdilate(BW2_endp,[0 1 0;1 1 1;0 1 0]);
-BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
+%BW2_endp_d                              = imdilate(BW2_endp,[0 1 0;1 1 1;0 1 0]);
+%BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
 
 %BW                                      = edge((uint8(1-cellBody).*channel_2),'canny',[],0.75);
 %BW2                                     = regionCells.*(BW.*imerode((1-cellBody),ones(3)));
@@ -56,7 +56,7 @@ BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
 
 %BW2_endp_3                                = imopen(BW2_endp_2,[0 1 0;1 1 1;0 1 0]);
 
-[BW3,numEdges]                          = bwlabel(BW2);
+[BW3,numEdges]                          = bwlabel(BW2|BW2_endp_b);
 BW4 = regionprops(BW3,channel_2,'Area',...
     'MajoraxisLength','MinoraxisLength',...
     'Eccentricity','Euler','MaxIntensity','BoundingBox');
@@ -66,12 +66,12 @@ BW5 = zeros(rows,cols);
 %%
 for k=1:numEdges
 %k=17;
-    if (BW4(k).Area<180)&&(BW4(k).Area>10)
+    if (BW4(k).Area<400)&&(BW4(k).Area>10)
         %disp(k)
         rr = max(1,floor(BW4(k).BoundingBox(2))):min(rows,ceil(BW4(k).BoundingBox(2)+BW4(k).BoundingBox(4)));
         cc = max(1,floor(BW4(k).BoundingBox(1))):min(cols,ceil(BW4(k).BoundingBox(1)+BW4(k).BoundingBox(3)));
         
-        BW5(rr,cc) = BW5(rr,cc) + imclose(BW3(rr,cc)==k,ones(3));
+        BW5(rr,cc) = BW5(rr,cc) + k*imfill(imclose(BW3(rr,cc)==k,ones(3)),'holes');
            
     end
 % imagesc(BW5)
