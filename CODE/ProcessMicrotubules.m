@@ -93,7 +93,7 @@ jet4 = [ 0         0    0
 %%
 tic;[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 %%
-k=1;
+k=3;
 [cellBody,cellNuclei,cellProtrusions]               =segmentCellNuclei(dataIn(:,:,:,k));
 [cellTubules]=segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
 subplot(131)
