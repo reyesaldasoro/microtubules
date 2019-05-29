@@ -20,11 +20,11 @@ end
 
 %% Read data and process with segmentMicrotubules
 %dataIn =readMTIFF('datasets/pair1.tif');
-dataIn =readMTIFF('datasets/2012_11_20_3.tif');
-
+%dataIn =readMTIFF('datasets/2012_11_20_3.tif');
+load 2012_11_20_3
 
 %%
-jet4 = [         0         0    0
+jet4 = [ 0         0    0
          0         0    0.6354
          0         0    0.7083
          0         0    0.7812
@@ -88,6 +88,20 @@ jet4 = [         0         0    0
     0.5238         0         0
     0.5119         0         0
     0.5000         0         0];
+
+
+%%
+tic;[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
+%%
+k=57;
+[cellBody,cellNuclei,cellProtrusions]               =segmentCellNuclei(dataIn(:,:,:,k));
+subplot(121)
+imagesc(dataIn(:,:,:,k))
+
+subplot(122)
+imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei-cellBody),ones(3)))))
+colormap(jet4)
+
 
 
 %%
