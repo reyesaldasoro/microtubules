@@ -34,6 +34,7 @@ BW2                                     = regionEdges.*(BW);
 BW2_endp                                = (bwmorph(BW2,'endpoints'));
 % Now bridge between the endpoints, this is better than closing or dilating
 % as only connections between end points are formed.
+
 BW2_endp_b                              = (bwmorph(BW2_endp,'bridge'));
 % Dilate with a cross and then apply a majority, single edges will stay the
 % same, but those tha are close will become a H and will keep the bridge
