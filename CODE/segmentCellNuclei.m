@@ -1,4 +1,4 @@
-function [cellBody,cellNuclei,cellProtrusions]=segmentTubulesCellNuclei(dataIn)
+function [cellBody,cellNuclei,cellProtrusions]=segmentCellNuclei(dataIn)
 %%
 [rows,cols,levs,timeFrames]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
