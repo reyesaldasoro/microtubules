@@ -113,7 +113,7 @@ tic;[cellBody,cellNuclei,cellTubules]               =segmentTubulesCellNuclei(da
 tic;[segmentedData,microTubules,dataOut,dataOut2]   =segmentMicrotubules(dataIn);toc
 %%
 
-%figure
+figure
 subplot(131)
 imagesc(dataIn(:,:,2,1))
 colormap(jet4)
@@ -125,6 +125,26 @@ colormap(jet4)
 subplot(133)
 imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(microTubules,ones(2)))))
 colormap(jet4)
+
+%%
+tic;[cellBody,cellNuclei,cellProtrusions]               =segmentCellNuclei(dataIn);toc
+tic;[cellTubules]=segmentTubules(dataIn,cellBody,cellNuclei,cellProtrusions);toc
+%%
+
+figure
+subplot(131)
+imagesc(dataIn(:,:,2,1))
+colormap(jet4)
+
+subplot(132)
+imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(cellTubules+ zerocross(cellBody),ones(2)))))
+colormap(jet4)
+
+subplot(133)
+imagesc(dataIn(:,:,2,1).*(1-uint8(imdilate(microTubules,ones(2)))))
+colormap(jet4)
+
+
 %%
 a=b;
 [segmentedData,microTubules,dataOut,dataOut2]=segmentMicrotubules(a(:,:,:,68));
