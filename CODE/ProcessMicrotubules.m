@@ -90,13 +90,15 @@ jet4 = [ 0         0    0
     0.5000         0         0];
 
 
-%%
-tic;[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
-%%
+%% Segment with the new process
 
-k=3;
-[cellBody,cellNuclei,cellProtrusions]               =segmentCellNuclei(dataIn(:,:,:,k));
-[cellTubules]=segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
+k=41;
+tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
+[cellBody,cellNuclei,cellProtrusions]       =segmentCellNuclei(dataIn(:,:,:,k));
+[cellTubules]                               =segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
+toc
+%% display new process
+figure
 subplot(131)
 imagesc(dataIn(:,:,:,k))
 
@@ -108,10 +110,28 @@ imagesc(cellNuclei+cellBody+0.3*cellProtrusions+0.5*cellTubules)
 
 
 
+%% segment with the old process 
+tic;
+[cellBody2,cellNuclei2,cellTubules2]               =segmentTubulesCellNuclei(dataIn(:,:,:,k));
+[segmentedData2,microTubules2,dataOut1,dataOut2]   =segmentMicrotubules(dataIn(:,:,:,k));
+toc
 %%
-tic;[cellBody,cellNuclei,cellTubules]               =segmentTubulesCellNuclei(dataIn);toc
-tic;[segmentedData,microTubules,dataOut,dataOut2]   =segmentMicrotubules(dataIn);toc
+
+figure
+subplot(131)
+imagesc(dataIn(:,:,:,k))
+
+subplot(132)
+imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei2-cellBody2),ones(3)))))
+colormap(jet4)
+subplot(133)
+imagesc(cellNuclei2+cellBody2+0.5*cellTubules2)
+
+
 %%
+
+
+
 
 figure
 subplot(131)
