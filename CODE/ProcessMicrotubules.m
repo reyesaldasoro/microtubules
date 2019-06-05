@@ -5,6 +5,8 @@ clear all
 close all
 clc 
 
+
+
 %% Read the files that have been stored in the current folder
 if strcmp(filesep,'/')
     % Running in Mac
@@ -88,7 +90,6 @@ jet4 = [ 0         0    0
     0.5238         0         0
     0.5119         0         0
     0.5000         0         0];
-
 
 %% Segment with the new process
 
