@@ -93,11 +93,11 @@ jet4 = [ 0         0    0
 
 %% Segment with the new process
 
-k=41;
-tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
+k=44;
+%tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 [cellBody,cellNuclei,cellProtrusions]       =segmentCellNuclei(dataIn(:,:,:,k));
-[cellTubules]                               =segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
-toc
+%[cellTubules]                               =segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
+%toc
 %% display new process
 figure
 subplot(131)
