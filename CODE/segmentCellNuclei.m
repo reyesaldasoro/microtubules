@@ -54,7 +54,10 @@ cellBody_4                              = ismember(cellBody_3L,cellsWithNuclei(2
 [cellBody_4L,numCells_4]                = bwlabel(cellBody_4);
 cellBody_4P                             = regionprops(cellBody_4L,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
 
-
+% Determine cells with 2 nuclei (clumps)
+nucleiPresent_centroids                 =(bwmorph(cellNuclei,'shrink','inf'));
+nucleiPresent_location                  = find(nucleiPresent_centroids);
+nucleiPresent                           = cellBody_4L(nucleiPresent_location);
 
 %% Process each cell individually
 cellBody_4R = cellBody_4L;
