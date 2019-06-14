@@ -19,9 +19,10 @@ level_1                                 = 255* graythresh(channel_1F);
 % Nuclei
 cellNuclei_1                            = (channel_1F>(0.75*level_1));
 cellNuclei_2                            = imclose(cellNuclei_1,strel('disk',3));
-cellNuclei_2L                             = bwlabel(cellNuclei_2);
+cellNuclei_2B                           = imopen(cellNuclei_2,ones(3));
+cellNuclei_2L                           = bwlabel(cellNuclei_2B);
 % Remove small specks
-cellNuclei_2P                             = regionprops(cellNuclei_2L,'Area');
+cellNuclei_2P                           = regionprops(cellNuclei_2L,'Area');
 cellNuclei                              = ismember(cellNuclei_2L,find([cellNuclei_2P.Area]>50));
 
 
