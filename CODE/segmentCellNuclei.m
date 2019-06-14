@@ -69,7 +69,7 @@ for counterCell = 1:numCells_4
     % if there is no change on the holes whilst dilating ignore
     conditionOfHoles = currentEuler~=1;
     if (any(conditionOfHoles))&(cellBody_4P(counterCell).Area<5000)
-        strelSize = 1+find(conditionOfHoles,1,'last')
+        strelSize = 1+find(conditionOfHoles,1,'last');
         cellBody_4R = cellBody_4R +imclose(cellBody_4L==counterCell,strel('disk',strelSize));
     elseif cellBody_4P(counterCell).Area<2000
         cellBody_4R = cellBody_4R +imclose(cellBody_4L==counterCell,strel('disk',7));
