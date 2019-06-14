@@ -93,21 +93,23 @@ jet4 = [ 0         0    0
 
 %% Segment with the new process
 
-k=44;
+k=36;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 [cellBody,cellNuclei,cellProtrusions]       =segmentCellNuclei(dataIn(:,:,:,k));
 %[cellTubules]                               =segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
 %toc
+ imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions)
+
 %% display new process
 figure
 subplot(131)
 imagesc(dataIn(:,:,:,k))
 
 subplot(132)
-imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei-cellBody),ones(3)))))
+imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei-(cellBody+cellProtrusions)),ones(3)))))
 colormap(jet4)
 subplot(133)
-imagesc(cellNuclei+cellBody+0.3*cellProtrusions+0.5*cellTubules)
+imagesc(cellNuclei+cellBody+0.3*cellProtrusions) %+0.5*cellTubules)
 
 
 
