@@ -18,7 +18,13 @@ level_1                                 = 255* graythresh(channel_1F);
 
 % Nuclei
 cellNuclei_1                            = (channel_1F>(0.75*level_1));
-cellNuclei                              = imclose(cellNuclei_1,strel('disk',3));
+cellNuclei_2                            = imclose(cellNuclei_1,strel('disk',3));
+cellNuclei_2L                             = bwlabel(cellNuclei_2);
+% Remove small specks
+cellNuclei_2P                             = regionprops(cellNuclei_2L,'Area');
+cellNuclei                              = ismember(cellNuclei_2L,find([cellNuclei_2P.Area]>50));
+
+
 
 % CELL BODY
 % Segment by intensity
@@ -29,7 +35,11 @@ cellBody_2                              = imfill(cellBody_1| imdilate(cellNuclei
 % Some cells can be rather open, it is important to close the gaps of those
 % cells, but only if: 1) they have only one nucleus (avoid clumps and cells
 % without a nucleus) 2) they are within a range of sizes >400 pixels to
-% avoid small specks 
+% avoid small specks AND 3) when closed incrementally - individually, the
+% cell first creates a new hole(s) that was not present before and
+% eventually it (them) become(s) filled with the closing with a larger
+% structural element. The euler numbers must go something like [1 1 1 0 -1
+% 1 1 1] so close with the smallest of the ones after the drop
 
 cellBody_2L                             = bwlabel(cellBody_2);
 % Remove small specks
@@ -41,52 +51,65 @@ cellBody_3L                             = bwlabel(cellBody_3);
 cellsBody_3L_Nuclei                     = cellBody_3L.*cellNuclei;
 cellsWithNuclei                         = unique(cellsBody_3L_Nuclei);
 cellBody_4                              = ismember(cellBody_3L,cellsWithNuclei(2:end));
-cellBody_4L                             = bwlabel(cellBody_4);
-
-% Determine cells with 2 nuclei (clumps)
-nucleiPresent_centroids                 =(bwmorph(cellNuclei,'shrink','inf'));
-nucleiPresent_location                  = find(nucleiPresent_centroids);
-nucleiPresent                           = cellBody_4L(nucleiPresent_location);
-
-
-
-%%
-cellBody_4E                             = imopen(cellBody_4L,strel('disk',3));
-cellBody_4EP                            = regionprops(cellBody_4E,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
+[cellBody_4L,numCells_4]                = bwlabel(cellBody_4);
 cellBody_4P                             = regionprops(cellBody_4L,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
-% The combination for a hollow cell is that 1) it has a solidity below 0.8
-% 2) it is not too large nor too small ( 700-2000) is not too elongated
-% eccentricity < 0.9 and only one nucleus
-%imagesc(cellBody_4E)
-
-%%
-cellBody_4R = cellBody_4L;%zeros(rows,cols);
-
-for k=1:numel(cellBody_4EP)
-    %k=17;
-    if (cellBody_4EP(k).Solidity<0.8)
-        if (cellBody_4EP(k).Area<2500)
-            if (cellBody_4EP(k).Area>500)
-                if (cellBody_4EP(k).Eccentricity<0.95)
-                    if (sum(nucleiPresent==k)==1)
-                        %disp(k)
-                        rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
-                        cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
-                        
-                        cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + cellBody_4EP(k).ConvexImage;
-                    end
-                end
-            end
-        else
-                                    rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
-                        cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
 
 
-            cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + imfill(imclose(cellBody_4L(rr,cc),strel('disk',(5))),'holes');
-        end
+
+%% Process each cell individually
+cellBody_4R = cellBody_4L;
+for counterCell = 1:numCells_4
+    % close with increasing size of structural element
+    for strelSize=1:11
+    currentEuler(strelSize) =bweuler(imclose(cellBody_4L==counterCell,strel('disk',strelSize)));
     end
-end
+    % if there is no change on the holes whilst dilating ignore
+    conditionOfHoles = currentEuler~=1;
+    if (any(conditionOfHoles))&(cellBody_4P(counterCell).Area<5000)
+        strelSize = 1+find(conditionOfHoles,1,'last')
+        cellBody_4R = cellBody_4R +imclose(cellBody_4L==counterCell,strel('disk',strelSize));
+    elseif cellBody_4P(counterCell).Area<2000
+        cellBody_4R = cellBody_4R +imclose(cellBody_4L==counterCell,strel('disk',7));
+     end
+end 
 cellBody_5                              = cellBody_4R>0;
+
+
+% % %%
+% % cellBody_4E                             = imopen(cellBody_4L,strel('disk',3));
+% % cellBody_4EP                            = regionprops(cellBody_4E,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
+% % cellBody_4P                             = regionprops(cellBody_4L,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
+% % % The combination for a hollow cell is that 1) it has a solidity below 0.8
+% % % 2) it is not too large nor too small ( 700-2000) is not too elongated
+% % % eccentricity < 0.9 and only one nucleus
+% % %imagesc(cellBody_4E)
+% % 
+% % %%
+% % cellBody_4R = cellBody_4L;%zeros(rows,cols);
+% % 
+% % for k=1:numel(cellBody_4EP)
+% %     %k=17;
+% %     if (cellBody_4EP(k).Solidity<0.8)
+% %         if (cellBody_4EP(k).Area<2000)
+% %             if (cellBody_4EP(k).Area>500)
+% %                 if (cellBody_4EP(k).Eccentricity<0.95)
+% %                     if (sum(nucleiPresent==k)==1)
+% %                         %disp(k)
+% %                         rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
+% %                         cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
+% % 
+% %                         cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + cellBody_4EP(k).ConvexImage;
+% %                     end
+% %                 end
+% %             end
+% %         else
+% %             rr = max(1,ceil(cellBody_4EP(k).BoundingBox(2))):min(rows,floor(cellBody_4EP(k).BoundingBox(2)+cellBody_4EP(k).BoundingBox(4)));
+% %             cc = max(1,ceil(cellBody_4EP(k).BoundingBox(1))):min(cols,floor(cellBody_4EP(k).BoundingBox(1)+cellBody_4EP(k).BoundingBox(3)));
+% %             cellBody_4R(rr,cc) = (cellBody_4L(rr,cc)) + imfill(imclose(cellBody_4L(rr,cc),strel('disk',(5))),'holes');
+% %         end
+% %     end
+% % end
+% % cellBody_5                              = cellBody_4R>0;
 %% Remove stems that are themselves tubules
 cellBody_6                             = bwlabel(imopen(cellBody_5,strel('disk',5)));
 cellBody_6P                             = regionprops(cellBody_6,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
@@ -100,4 +123,4 @@ cellBody                                = cellBody_7;
 cellProtrusions_1                         = bwlabel(cellBody_5-cellBody_7);
 cellProtrusions_P                            = regionprops(cellProtrusions_1,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity','majoraxislength');
 cellProtrusions                              = ismember(cellProtrusions_1,find([cellProtrusions_P.MajorAxisLength]>10));
-%imagesc(cellBody+2*cellNuclei)
+%imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions)
