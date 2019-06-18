@@ -89,8 +89,9 @@ BW8 = regionprops(BW7,channel_2,'Area','MinIntensity','MeanIntensity','MaxIntens
     'Eccentricity','Euler','BoundingBox');
 %% Final tubules
 % Brightest tubules, take the minimum levels and compare with the max of each tubule
+% and also discard anything less than 5 pixels
 brightTubLev     = ceil( mean(double([BW8.MinIntensity]))+0.5*std(double([BW8.MinIntensity])));
-cellTubules      =(ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>5)));
+cellTubules      = (ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>5)));
 
 %
 %brightTubLev    = 0.05*max([BW8.MaxIntensity]) +0.95*   mean([BW8.MaxIntensity]);
