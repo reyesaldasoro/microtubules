@@ -95,9 +95,10 @@ jet4 = [ 0         0    0
 
 k=41;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
-[cellBody,cellNuclei,cellProtrusions]       = segmentCellNuclei(dataIn(:,:,:,k));
-[clumps,notClumps,degreeClump]              = analyseCellConditions(cellBody,cellNuclei);
-%[cellTubules]                               =segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);
+tic;[cellBody,cellNuclei,cellProtrusions]       = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
+tic;[clumps,notClumps,degreeClump,cellBody_L]   = analyseCellConditions(cellBody,cellNuclei);t2=toc;
+tic;[cellTubules]                               = segmentTubules(dataIn(:,:,:,k),cellBody,cellNuclei,cellProtrusions);t3=toc;
+disp([t1 t2 t3])
 %toc
  imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions)
 
@@ -110,5 +111,7 @@ subplot(132)
 imagesc(dataIn(:,:,2,k).*(1-uint8(imdilate( zerocross(cellNuclei-(cellBody+cellProtrusions)),ones(3)))))
 colormap(jet4)
 subplot(133)
-imagesc(cellNuclei+cellBody+0.3*cellProtrusions) %+0.5*cellTubules)
+%imagesc(cellNuclei+cellBody+0.3*cellProtrusions+0.5*cellTubules)
+imagesc(double(dataIn(:,:,2,k)).*(1-cellTubules).*(1-(imdilate(zerocross(cellNuclei-(cellBody+cellProtrusions)),ones(3)))))
+colormap(jet4)
 
