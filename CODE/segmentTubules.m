@@ -1,6 +1,6 @@
-function [cellTubules]=segmentTubules(dataIn,cellBody,cellNuclei,cellProtrusions)
+function [cellTubules]=segmentTubules(dataIn,cellBody,cellProtrusions)
 %%
-[rows,cols,levs,timeFrames]                        = size(dataIn);
+[rows,cols,~,~]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
 sizeFilter                              = 5;
 filtG                                   = gaussF(sizeFilter,sizeFilter,1);
@@ -9,12 +9,12 @@ filtG                                   = gaussF(sizeFilter,sizeFilter,1);
 currentData                             = dataIn(:,:,:,1);
 channel_1                               = (currentData(:,:,1));          % select the first  level of the 3D matrix
 channel_2                               = (currentData(:,:,2));          % select the second level of the 3D matrix
-channel_1F                              = imfilter((channel_1),filtG,'replicate');
-channel_2F                              = imfilter((channel_2),filtG,'replicate');
+%channel_1F                              = imfilter((channel_1),filtG,'replicate');
+%channel_2F                              = imfilter((channel_2),filtG,'replicate');
 %%
 % Otsu threshold
-level_2                                 = 255* graythresh(channel_2F);
-level_1                                 = 255* graythresh(channel_1F);
+%level_2                                 = 255* graythresh(channel_2F);
+%level_1                                 = 255* graythresh(channel_1F);
 
 
 %% Only calculate the edges OUTSIDE the cells and close to them
