@@ -19,9 +19,9 @@ level_1                                 = 255* graythresh(channel_1F);
 
 %% Only calculate the edges OUTSIDE the cells and close to them
 %cellBody_3                              = imopen(cellBody_2,ones(3));
-distFromCells                           = bwdist(cellBody);
-regionCells                             = (distFromCells)<55;
-regionEdges                             = regionCells-imdilate(cellBody,ones(3));
+distFromCells                           = bwdist(cellBody+cellProtrusions);
+regionCells                             = (distFromCells)<85;
+regionEdges                             = regionCells-imdilate(cellBody+cellProtrusions,ones(3));
 
 %imagesc(cellBody+2*cellNuclei)
 %% Prepare for the tubules
@@ -71,7 +71,9 @@ for k=1:numEdges
         %disp(k)
         rr = max(1,floor(BW4(k).BoundingBox(2))):min(rows,ceil(BW4(k).BoundingBox(2)+BW4(k).BoundingBox(4)));
         cc = max(1,floor(BW4(k).BoundingBox(1))):min(cols,ceil(BW4(k).BoundingBox(1)+BW4(k).BoundingBox(3)));
-        BW5(rr,cc) = BW5(rr,cc) + k*imfill(imclose(BW3(rr,cc)==k,ones(3)),'holes');
+        %BW5(rr,cc) = BW5(rr,cc) + k*imfill(imclose(BW3(rr,cc)==k,ones(3)),'holes');
+        BW5(rr,cc) = BW5(rr,cc) + k*(imclose(BW3(rr,cc)==k,ones(5)));
+
     end
 % imagesc(BW5)
 end
@@ -82,11 +84,15 @@ BW7 = bwlabel(bwmorph(BW6,'spur',0));
 %BW6 = BW5 - BW2;
 %BW7 = bwlabel(BW6==1);
 
-BW8 = regionprops(BW7,channel_2,'Area',...
+BW8 = regionprops(BW7,channel_2,'Area','MinIntensity','MeanIntensity','MaxIntensity',...
     'MajoraxisLength','MinoraxisLength',...
-    'Eccentricity','Euler','MaxIntensity','BoundingBox');
+    'Eccentricity','Euler','BoundingBox');
 %% Final tubules
-% Brightest tubules
+% Brightest tubules, take the minimum levels and compare with the max of each tubule
+brightTubLev     = ceil( mean(double([BW8.MinIntensity]))+0.5*std(double([BW8.MinIntensity])));
+cellTubules      =(ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>5)));
+
+%
 %brightTubLev    = 0.05*max([BW8.MaxIntensity]) +0.95*   mean([BW8.MaxIntensity]);
 %BW9A             =(ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>15)));
 % Long and straight
@@ -99,5 +105,5 @@ BW8 = regionprops(BW7,channel_2,'Area',...
 %BW13            = imclose(BW12,ones(1));
 %imagesc((BW7>0)+(BW13))
 %cellTubules         = BW13;
-cellTubules         = ismember(BW7,find([BW8.MajorAxisLength]>6));
+%cellTubules         = ismember(BW7,find([BW8.MajorAxisLength]>6));
 
