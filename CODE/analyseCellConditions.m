@@ -1,4 +1,4 @@
-function [clumps,notClumps,degreeClump]=analyseCellConditions(cellBody,cellNuclei)
+function [clumps,notClumps,degreeClump,cellBody_L]=analyseCellConditions(cellBody,cellNuclei)
 %%
 
 % Determine cells with 2 or more nuclei (clumps)
