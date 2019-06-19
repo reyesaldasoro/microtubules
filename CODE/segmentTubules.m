@@ -9,6 +9,7 @@ filtG                                   = gaussF(sizeFilter,sizeFilter,1);
 currentData                             = dataIn(:,:,:,1);
 channel_1                               = (currentData(:,:,1));          % select the first  level of the 3D matrix
 channel_2                               = (currentData(:,:,2));          % select the second level of the 3D matrix
+channel_2_noCells                       = channel_2.*imerode(uint8(1-cellBody),ones(3));
 %channel_1F                              = imfilter((channel_1),filtG,'replicate');
 %channel_2F                              = imfilter((channel_2),filtG,'replicate');
 %%
@@ -29,69 +30,81 @@ regionEdges                             = regionCells-imdilate(cellBody+cellProt
 BW                                      = edge(channel_2,'canny',[],0.75);
 % remove all those that are far from the cells or on the cells themselves
 BW2                                     = regionEdges.*(BW);
+[BW2_L,numEdges]                        = bwlabel(BW2);
+
+BW2_Props                               = regionprops(BW2_L,channel_2,'Area',...
+    'MajoraxisLength','MinoraxisLength',...
+    'Eccentricity','Euler','MaxIntensity','BoundingBox');
+
+
+%% Iterate over all edges, find the pixels that surround them and take only that are brighter than the rest, 
+% 50-50 for a line 33-66 for a horseshoe
+BW3 = zeros(rows,cols);
+for k=1:numEdges
+    if (BW2_Props(k).Area>5)
+        %disp(k)
+        rr                  = max(1,-3+floor(BW2_Props(k).BoundingBox(2))):min(rows,3+ceil(BW2_Props(k).BoundingBox(2)+BW2_Props(k).BoundingBox(4)));
+        cc                  = max(1,-3+floor(BW2_Props(k).BoundingBox(1))):min(cols,3+ceil(BW2_Props(k).BoundingBox(1)+BW2_Props(k).BoundingBox(3)));
+        currentEdge         = bwmorph(BW2_L(rr,cc)==k,'thin');
+        currentDist         = bwdist(currentEdge);
+        currentBoundary     = (floor(currentDist)==1)+(currentDist==2);
+        % important to remove the cell from the intensitites otherwise it can lead to
+        % a very high threshold
+        %currentIntens       = channel_2(rr,cc).*uint8(1-cellBody(rr,cc));
+        currentIntens       = channel_2_noCells(rr,cc);
+        currentHistog       = currentIntens(currentBoundary==1);
+        currentThres        = 255*graythresh(currentHistog);
+        currentRidge        = ((currentIntens>=(0.9*currentThres)).*(currentBoundary));
+        currentRidge2       = (imdilate(currentRidge,ones(3)));
+        currentRidge3       = bwmorph(currentRidge2,'thin','inf');
+
+        %BW5(rr,cc) = BW5(rr,cc) + k*imfill(imclose(BW3(rr,cc)==k,ones(3)),'holes');
+        BW3(rr,cc) = BW3(rr,cc) + k*(currentRidge3);
+        %imagesc(BW5);drawnow;pause(0.05)
+    end
+end
+
+
 % find endpoints of the edges to connect those that are separated as in 1 1
 % 1 0 1 1 1
-BW2_endp                                = (bwmorph(BW2,'endpoints'));
+BW2_endp                                = (bwmorph(BW3>0,'endpoints'));
 % Now bridge between the endpoints, this is better than closing or dilating
 % as only connections between end points are formed.
 
-BW2_endp_b                              = (bwmorph(BW2_endp,'bridge'));
+%BW2_endp_b                              = (bwmorph(BW2_endp,'bridge'));
 % Dilate with a cross and then apply a majority, single edges will stay the
 % same, but those tha are close will become a H and will keep the bridge
-%BW2_endp_d                              = imdilate(BW2_endp,[0 1 0;1 1 1;0 1 0]);
-%BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
+BW2_endp_d                              = imdilate(BW2_endp,[0 1 0;1 1 1;0 1 0]);
+BW2_endp_m                              = (bwmorph(BW2_endp_d,'majority'));
 
-%BW                                      = edge((uint8(1-cellBody).*channel_2),'canny',[],0.75);
-%BW2                                     = regionCells.*(BW.*imerode((1-cellBody),ones(3)));
-% BW2_endp_1                              = imclose(BW2_endp,[1 1 1]);
-% BW2_endp_2                              = imclose(BW2_endp,[1 1 1]');
-% BW2_endp_3                              = imclose(BW2_endp,[1 0;0 1;0 1 ]');
-% BW2_endp_4                              = imclose(BW2_endp,[1 0;1 0;0 1 ]');
-% BW2_endp_3                              = imclose(BW2_endp,[0 1 1;1 1 1 ]);
-% BW2_endp_4                              = imclose(BW2_endp,[1 1 0;1 1 1 ]);
-% 
-% BW2_endp_5                              = -BW2_endp+ (BW2_endp_1|BW2_endp_2|BW2_endp_3|BW2_endp_4) ;
-
-
-
-%BW2_endp_3                                = imopen(BW2_endp_2,[0 1 0;1 1 1;0 1 0]);
+%% Thin the edges and remove spurious pixels
+BW4 = bwmorph(((BW3>0)+BW2_endp_m)>0,'thin');
 
 % Label to discard very small edges
-[BW3,numEdges]                          = bwlabel(BW2|BW2_endp_b);
-BW4 = regionprops(BW3,channel_2,'Area',...
+[BW4_L,numEdges]                          = bwlabel(BW4);
+BW4_P = regionprops(BW4_L,channel_2,'Area',...
     'MajoraxisLength','MinoraxisLength',...
     'Eccentricity','Euler','MaxIntensity','BoundingBox');
 %imagesc(BW)
 %%
-BW5 = zeros(rows,cols);
-%% A tubule will show as edges on both sides, so close one by one 
-% so that separate tubules do not connect, especially parallel ones
-for k=1:numEdges
-    if (BW4(k).Area<400)&&(BW4(k).Area>10)
-        %disp(k)
-        rr = max(1,floor(BW4(k).BoundingBox(2))):min(rows,ceil(BW4(k).BoundingBox(2)+BW4(k).BoundingBox(4)));
-        cc = max(1,floor(BW4(k).BoundingBox(1))):min(cols,ceil(BW4(k).BoundingBox(1)+BW4(k).BoundingBox(3)));
-        %BW5(rr,cc) = BW5(rr,cc) + k*imfill(imclose(BW3(rr,cc)==k,ones(3)),'holes');
-        BW5(rr,cc) = BW5(rr,cc) + k*(imclose(BW3(rr,cc)==k,ones(5)));
 
-    end
-% imagesc(BW5)
-end
-%% Thin the edges and remove spurious pixels
-BW6 = (bwmorph(BW5,'thin','inf'));
-BW7 = bwlabel(bwmorph(BW6,'spur',0));
+cellTubules      = (ismember(BW4_L,find([BW4_P.Area]>5)));
 
-%BW6 = BW5 - BW2;
-%BW7 = bwlabel(BW6==1);
-
-BW8 = regionprops(BW7,channel_2,'Area','MinIntensity','MeanIntensity','MaxIntensity',...
-    'MajoraxisLength','MinoraxisLength',...
-    'Eccentricity','Euler','BoundingBox');
-%% Final tubules
-% Brightest tubules, take the minimum levels and compare with the max of each tubule
-% and also discard anything less than 5 pixels
-brightTubLev     = ceil( mean(double([BW8.MinIntensity]))+0.5*std(double([BW8.MinIntensity])));
-cellTubules      = (ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>5)));
+% %%
+% BW6 = (bwmorph(BW5,'thin','inf'));
+% BW7 = bwlabel(bwmorph(BW6,'spur',0));
+% 
+% %BW6 = BW5 - BW2;
+% %BW7 = bwlabel(BW6==1);
+% 
+% BW8 = regionprops(BW7,channel_2,'Area','MinIntensity','MeanIntensity','MaxIntensity',...
+%     'MajoraxisLength','MinoraxisLength',...
+%     'Eccentricity','Euler','BoundingBox');
+% %% Final tubules
+% % Brightest tubules, take the minimum levels and compare with the max of each tubule
+% % and also discard anything less than 5 pixels
+% brightTubLev     = ceil( mean(double([BW8.MinIntensity]))+0.5*std(double([BW8.MinIntensity])));
+% cellTubules      = (ismember(BW7,find([BW8.MaxIntensity]>brightTubLev))).*(ismember(BW7,find([BW8.Area]>5)));
 
 %
 %brightTubLev    = 0.05*max([BW8.MaxIntensity]) +0.95*   mean([BW8.MaxIntensity]);
