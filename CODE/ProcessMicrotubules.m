@@ -93,7 +93,7 @@ jet4 = [ 0         0    0
 
 %% Segment with the new process
 
-k=41;
+k=3;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 tic;[cellBody,cellNuclei,cellProtrusions]       = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
 tic;[clumps,notClumps,degreeClump,cellBody_L]   = analyseCellConditions(cellBody,cellNuclei);t2=toc;
