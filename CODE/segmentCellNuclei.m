@@ -123,8 +123,8 @@ cellBody_7                              = ismember(cellBody_6,find([cellBody_6P.
 %%
 
 
-cellBody                                = cellBody_7;
-cellProtrusions_1                         = bwlabel(cellBody_5-cellBody_7);
-cellProtrusions_P                            = regionprops(cellProtrusions_1,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity','majoraxislength');
-cellProtrusions                              = ismember(cellProtrusions_1,find([cellProtrusions_P.MajorAxisLength]>10));
+cellBody                                    = cellBody_7;
+cellProtrusions_1                           = bwlabel(cellBody_5-cellBody_7);
+cellProtrusions_P                           = regionprops(cellProtrusions_1,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity','majoraxislength');
+cellProtrusions                             = ismember(cellProtrusions_1,find([cellProtrusions_P.MajorAxisLength]>10));
 %imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions)
