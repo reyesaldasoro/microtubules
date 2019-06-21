@@ -1,4 +1,4 @@
-function [cellTubules_L]=allocateTubules(cellBody_L,cellProtrusions,cellTubules)
+function [cellTubules_L2]=allocateTubules(cellBody_L,cellProtrusions,cellTubules)
 
 %% join cellBody with cellProtrusions
 % Some protrusions will be close to just one cell, allocate those first
@@ -28,7 +28,7 @@ end
 
 %%
 cellBody_L_Complete     = cellProtrusions_L2+cellBody_L;
-cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(9));
+cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(35));
 
 %%
 imagesc(cellBody_L_CompleteD.*cellTubules)
@@ -38,9 +38,9 @@ imagesc(cellBody_L_CompleteD.*cellTubules)
 [cellTubules_L,numTubules]          = bwlabel(cellTubules);
 cellTubules_L2                      = zeros(size(cellTubules_L));
 
-for counterTub = 1:numProt
+for counterTub = 1:numTubules
     currentTub                     = (cellTubules_L==counterTub);
-    currentOverlap                  = cellBody_LD.*currentTub;
+    currentOverlap                  = cellBody_L_CompleteD.*currentTub;
     classTub                       = unique(currentOverlap);
     if numel(classTub)==2
         % only two elements, [0 X] allocate to the second element
@@ -52,15 +52,19 @@ for counterTub = 1:numProt
             numElements(counterClasses) = sum(currentOverlap(:)==classTub(counterClasses+1));
         end
         [maxNum,indMax]= max(numElements);
+        % allocate to the one that belongs the most, i.e. closest to the
+        % cell
         cellTubules_L2  = cellTubules_L2 + classTub(indMax+1)*currentTub;
-        
+        % or allocate a new class of the sum of the classes
+        cellTubules_L2  = cellTubules_L2 + sum(classTub(2:end))*currentTub;
     else
         % tubule does not overlap, leave at 1 for the time being
+         cellTubules_L2  = cellTubules_L2 + 1*currentTub;
     end
 end
 
 %%
-imagesc(cellBody_L_CompleteD.*cellTubules)
+imagesc(cellBody_L_Complete+cellTubules_L2)
 
 %%
 qq=1;
