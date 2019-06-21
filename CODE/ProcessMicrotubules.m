@@ -100,7 +100,7 @@ tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(data
 tic;[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);t2=toc;
 tic;[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
 tic;[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);t4=toc;
-tic;[dataOut_C, dataOut_CT,dataOut_CT2]= prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);t5=toc
+tic;[dataOut_C, dataOut_CT,dataOut_CT2]                 = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);t5=toc
 disp([t1 t2 t3 t4 t5])
 %toc
 % imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions+ 5*cellTubules)
