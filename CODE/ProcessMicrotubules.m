@@ -95,7 +95,7 @@ jet4 = [ 0         0    0
 
 k=3;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
-tic;[cellBody,cellNuclei,cellProtrusions]       = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
+tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei] = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
 tic;[clumps,notClumps,degreeClump,cellBody_L]   = analyseCellConditions(cellBody,cellNuclei);t2=toc;
 tic;[cellTubules]                               = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
 disp([t1 t2 t3])
