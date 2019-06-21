@@ -1,4 +1,4 @@
-function [cellBody,cellNuclei,cellProtrusions]=segmentCellNuclei(dataIn)
+function [cellBody,cellNuclei,cellProtrusions,cellNoNuclei]=segmentCellNuclei(dataIn)
 %%
 [rows,cols,levs,timeFrames]                        = size(dataIn);
 % filter to obtain a slightly better segmentation
@@ -54,6 +54,7 @@ cellsWithNuclei                         = unique(cellsBody_3L_Nuclei);
 cellBody_4                              = ismember(cellBody_3L,cellsWithNuclei(2:end));
 [cellBody_4L,numCells_4]                = bwlabel(cellBody_4);
 cellBody_4P                             = regionprops(cellBody_4L,'Area','ConvexHull','ConvexImage','BoundingBox','Solidity','Eccentricity');
+cellNoNuclei                            = cellBody_3-cellBody_4;
 
 % Determine cells with 2 nuclei (clumps)
 nucleiPresent_centroids                 =(bwmorph(cellNuclei,'shrink','inf'));
