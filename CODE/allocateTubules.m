@@ -60,7 +60,7 @@ for counterTub = 1:numTubules
         % cell
         cellTubules_L2  = cellTubules_L2 + classTub(indMax+1)*currentTub;
         % or allocate a new class of the sum of the classes
-        cellTubules_L2  = cellTubules_L2 + sum(classTub(2:end))*currentTub;
+        %cellTubules_L2  = cellTubules_L2 + sum(classTub(2:end))*currentTub;
     else
         % tubule does not overlap, leave at 1 for the time being
          cellTubules_L2  = cellTubules_L2 +(numCells+2)*currentTub;
