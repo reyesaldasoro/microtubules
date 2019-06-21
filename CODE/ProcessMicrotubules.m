@@ -91,18 +91,42 @@ jet4 = [ 0         0    0
     0.5119         0         0
     0.5000         0         0];
 
+    
 %% Segment with the new process
 
 k=3;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
-tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei] = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
-tic;[clumps,notClumps,degreeClump,cellBody_L]   = analyseCellConditions(cellBody,cellNuclei);t2=toc;
-tic;[cellTubules]                               = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
-disp([t1 t2 t3])
+tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
+tic;[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);t2=toc;
+tic;[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
+tic;[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);t4=toc;
+disp([t1 t2 t3 t4])
 %toc
  imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions+ 5*cellTubules)
 
 %% display new process
+dataOut_C                   = dataIn(:,:,:,k);
+% delineate cell and nuclei
+dilatedCellNuc              = uint8(imdilate( zerocross(cellNuclei-(cellBody+cellProtrusions)),ones(2)));
+dataOut_C                   = dataOut_C.*(repmat(1-dilatedCellNuc,[1 1 3]))+repmat(255*dilatedCellNuc,[1 1 3]);
+imagesc(dataOut_C)
+%% add the tubules with colours
+numTubules  = max(cellTubules_L(:));
+clear jet3
+jet3 = zeros(numTubules,3);
+        jet3(1:end,:)=0.2+round(-15+120*rand(numTubules,3))/100;
+        jet3(jet3>1)=1;
+%%
+dataOut_CT                  = dataOut_C;
+for counterTub =1:numTubules
+    dataOut_CT(:,:,1)           = dataOut_CT(:,:,1).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,1)*255;
+    dataOut_CT(:,:,2)           = dataOut_CT(:,:,2).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,2)*255;
+    dataOut_CT(:,:,3)           = dataOut_CT(:,:,3).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,3)*255;
+    
+    
+end
+imagesc(dataOut_CT)
+%%
 figure
 subplot(131)
 imagesc(dataIn(:,:,:,k))
