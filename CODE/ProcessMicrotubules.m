@@ -101,7 +101,7 @@ tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(data
 tic;[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);t2=toc;
 tic;[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
 tic;[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);t4=toc;
-tic;[dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]                 = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);t5=toc
+tic;[dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]     = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);t5=toc
 disp([t1 t2 t3 t4 t5 t1+t2+t3+t4+t5])
 %toc
 % imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions+ 5*cellTubules)
@@ -123,17 +123,27 @@ colormap(jet4)
 
 
 %%
+h0=gcf;
 hDataOut = imagesc(dataOut_CT3);
 hTitle   = title('');
-
-for k=1:numTimePoints
+clear F;
+%%
+for k=359:numTimePoints
     
     [cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(dataIn(:,:,:,k));
-[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);
-[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);
-[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);
-[dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]                 = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);
-
+    [clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);
+    [cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);
+    [cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);
+    [dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]     = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);
+    hTitle.String                                       = strcat('Time =',32,num2str(k));
+    hDataOut.CData                                      = dataOut_CT3;
+    drawnow;
+    pause(0.01)
+    F(k) = getframe(h0);
 end
-
+%%
+v = VideoWriter('Tubules_2012_11_20_3.mp4', 'MPEG-4');
+open(v);
+writeVideo(v,F);
+close(v);
 
