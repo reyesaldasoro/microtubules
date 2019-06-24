@@ -55,6 +55,7 @@ for counterTub = 1:numTubules
     if numel(classTub)==2
         % only two elements, [0 X] allocate to the second element
         cellTubules_L1          = cellTubules_L1 + classTub(2)*currentTub;
+        cellTubules_L2          = cellTubules_L2 + classTub(2)*currentTub;
         cellTubules_L3          = cellTubules_L3 + 1*currentTub;        
     elseif numel(classTub)>2
         % more than one element, should allocate to whichever is closest
@@ -68,11 +69,12 @@ for counterTub = 1:numTubules
         cellTubules_L1  = cellTubules_L1 + classTub(indMax+1)*currentTub;
         % or allocate a new class of the sum of the classes
         cellTubules_L2  = cellTubules_L2 + sum(classTub(2:end))*currentTub;
-        cellTubules_L3          = cellTubules_L3 + 2*currentTub;
+        cellTubules_L3  = cellTubules_L3 + 2*currentTub;
     else
-        % tubule does not overlap, leave at 1 for the time being
+        % tubule does not overlap with a cell, leave at 1 for the time being
          cellTubules_L1  = cellTubules_L1 +(numCells+2)*currentTub;
-         cellTubules_L3          = cellTubules_L3 + 3*currentTub;
+         cellTubules_L2  = cellTubules_L1 +(numCells+2)*currentTub;
+         cellTubules_L3  = cellTubules_L3 + 3*currentTub;
     end
 end
 
