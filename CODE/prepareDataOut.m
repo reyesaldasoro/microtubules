@@ -1,4 +1,4 @@
-function [dataOut_C, dataOut_CT, dataOut_CT2]= prepareDataOut(dataIn,cellBody_L_Complete,cellNuclei,cellTubules_L)
+function [dataOut_C, dataOut_CT, dataOut_CT2,dataOut_CT3]= prepareDataOut(dataIn,cellBody_L_Complete,cellNuclei,cellTubules_L)
 
 %% Just the data and cell/nuclei
 dataOut_C                       = dataIn;
@@ -9,10 +9,11 @@ dataOut_C                       = dataOut_C.*(repmat(1-dilatedCellNuc,[1 1 3]))+
 
 
 %% add tubules all with the same colour
-numTubules  = max(cellTubules_L(:));
-dataOut_CT                     = dataOut_C;
+cellTubules_L0                  = cellTubules_L{1};
+numTubules                      = max(cellTubules_L0(:));
+dataOut_CT                      = dataOut_C;
 for counterTub                  = 1:numTubules
-    dataOut_CT(cellTubules_L==counterTub) =255;
+    dataOut_CT(cellTubules_L0==counterTub) =255;
 end
 
 %% add the tubules with colours per cells
@@ -24,12 +25,17 @@ jet3(jet3>1)                    = 1;
 %%
 dataOut_CT2                      = dataOut_C;
 for counterTub =1:numTubules
-    dataOut_CT2(:,:,1)           = dataOut_CT2(:,:,1).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,1)*255;
-    dataOut_CT2(:,:,2)           = dataOut_CT2(:,:,2).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,2)*255;
-    dataOut_CT2(:,:,3)           = dataOut_CT2(:,:,3).*uint8(cellTubules_L~=counterTub) + uint8(cellTubules_L==counterTub)*jet3(counterTub,3)*255;
+    dataOut_CT2(:,:,1)           = dataOut_CT2(:,:,1).*uint8(cellTubules_L0~=counterTub) + uint8(cellTubules_L0==counterTub)*jet3(counterTub,1)*255;
+    dataOut_CT2(:,:,2)           = dataOut_CT2(:,:,2).*uint8(cellTubules_L0~=counterTub) + uint8(cellTubules_L0==counterTub)*jet3(counterTub,2)*255;
+    dataOut_CT2(:,:,3)           = dataOut_CT2(:,:,3).*uint8(cellTubules_L0~=counterTub) + uint8(cellTubules_L0==counterTub)*jet3(counterTub,3)*255;
 end
 %imagesc(dataOut_CT)
 
 %% Tubules with colours per class: cell/no cell/connect
 dataOut_CT3                      = dataOut_C;
+%for counterClass =1:3
 
+    dataOut_CT3(:,:,1)           = dataOut_CT3(:,:,1).*uint8(cellTubules_L{4}~=1) + uint8(cellTubules_L{4}==1)*255;
+    dataOut_CT3(:,:,2)           = dataOut_CT3(:,:,2).*uint8(cellTubules_L{4}~=2) + uint8(cellTubules_L{4}==2)*255;
+    dataOut_CT3(:,:,3)           = dataOut_CT3(:,:,3).*uint8(cellTubules_L{4}~=3) + uint8(cellTubules_L{4}==3)*255;
+%end
