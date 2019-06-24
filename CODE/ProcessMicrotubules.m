@@ -25,6 +25,7 @@ end
 %dataIn =readMTIFF('datasets/2012_11_20_3.tif');
 load 2012_11_20_3
 
+numTimePoints       =size(dataIn,4);
 %%
 jet4 = [ 0         0    0
          0         0    0.6354
@@ -94,17 +95,17 @@ jet4 = [ 0         0    0
     
 %% Segment with the new process
 
-k=8;
+k=98;
 %tic;%[cellBody,cellNuclei]               =segmentCellNuclei(dataIn);toc
 tic;[cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(dataIn(:,:,:,k));t1=toc;
 tic;[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);t2=toc;
 tic;[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);t3=toc;
 tic;[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);t4=toc;
 tic;[dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]                 = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);t5=toc
-disp([t1 t2 t3 t4 t5])
+disp([t1 t2 t3 t4 t5 t1+t2+t3+t4+t5])
 %toc
 % imagesc(cellBody+2*cellNuclei+ 4* cellProtrusions+ 5*cellTubules)
-imagesc(dataOut_CT2)
+imagesc(dataOut_CT3)
 %% display new process
 
 %%
@@ -119,4 +120,20 @@ subplot(133)
 %imagesc(cellNuclei+cellBody+0.3*cellProtrusions+0.5*cellTubules)
 imagesc(double(dataIn(:,:,2,k)).*(1-(cellTubules>0)).*(1-(imdilate(zerocross(cellNuclei-(cellBody+cellProtrusions)),ones(3)))))
 colormap(jet4)
+
+
+%%
+hDataOut = imagesc(dataOut_CT3);
+hTitle   = title('');
+
+for k=1:numTimePoints
+    
+    [cellBody,cellNuclei,cellProtrusions,cellNoNuclei]  = segmentCellNuclei(dataIn(:,:,:,k));
+[clumps,notClumps,degreeClump,cellBody_L]           = analyseCellConditions(cellBody,cellNuclei);
+[cellTubules]                                       = segmentTubules(dataIn(:,:,:,k),cellBody,cellProtrusions);
+[cellTubules_L,cellBody_L_Complete]                 = allocateTubules(cellBody_L,cellProtrusions,cellTubules,cellNoNuclei);
+[dataOut_C, dataOut_CT,dataOut_CT2,dataOut_CT3]                 = prepareDataOut(dataIn(:,:,:,k),cellBody_L_Complete,cellNuclei,cellTubules_L);
+
+end
+
 
