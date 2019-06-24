@@ -16,7 +16,7 @@ for counterProt = 1:numProt
     if numClassesProt==2
         % only two elements, [0 X] allocate to the second element
         cellProtrusions_L2  = cellProtrusions_L2 + classProt(2)*currentProt;
-    else
+    elseif numClassesProt>2
         % more than one element, should allocate to whichever is closest
         % ... or has more of it 
         numElements = zeros(numClassesProt-1,1);
@@ -24,7 +24,11 @@ for counterProt = 1:numProt
             numElements(counterClasses) = sum(currentOverlap(:)==classProt(counterClasses+1));
         end
         [~,indMax]= max(numElements);
+
         cellProtrusions_L2  = cellProtrusions_L2 + classProt(indMax+1)*currentProt;
+
+    else
+        %no overlap, discard
         
     end
 end
@@ -68,10 +72,12 @@ for counterTub = 1:numTubules
         [~,indMax]= max(numElements);
         % allocate to the one that belongs the most, i.e. closest to the
         % cell
+        %imagesc(currentTub)
         cellTubules_L1  = cellTubules_L1 + classTub(indMax+1)*currentTub;
         % or allocate a new class of the sum of the classes
         cellTubules_L2  = cellTubules_L2 + sum(classTub(2:end))*currentTub;
         cellTubules_L3  = cellTubules_L3 + 2*currentTub;
+        
     else
         % tubule does not overlap with a cell, leave at 1 for the time being
          cellTubules_L1  = cellTubules_L1 +(numCells+2)*currentTub;
