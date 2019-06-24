@@ -32,7 +32,7 @@ end
 
 %%
 cellBody_L_Complete     = cellProtrusions_L2+cellBody_L;
-cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(35));
+cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(25));
 
 %%
 %imagesc(cellBody_L_CompleteD.*cellTubules)
@@ -61,6 +61,7 @@ for counterTub = 1:numTubules
     elseif numel(classTub)>2
         % more than one element, should allocate to whichever is closest
         % ... or has more of it 
+        clear numElements
         for counterClasses = 1:numel(classTub)-1
             numElements(counterClasses) = sum(currentOverlap(:)==classTub(counterClasses+1));
         end
