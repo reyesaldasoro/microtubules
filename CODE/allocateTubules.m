@@ -44,7 +44,7 @@ cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(35));
 % 2) allocate a new class of the sum of the classes when overlap
 % 3) allocate as cell/contact/no cell
 
-[cellTubules_L0,numTubules]          = bwlabel(cellTubules);
+[cellTubules_L0,numTubules]          = bwlabel(cellTubules.*(cellBody_L_Complete==0));
 cellTubules_L1                      = zeros(size(cellTubules_L0));
 cellTubules_L2                      = zeros(size(cellTubules_L0));
 cellTubules_L3                      = zeros(size(cellTubules_L0));
@@ -79,7 +79,7 @@ for counterTub = 1:numTubules
     end
 end
 
-%%
+%% remove overlap with cells and save in a single variable
 %imagesc(cellBody_L_Complete+cellTubules_L2)
 
 cellTubules_L = {cellTubules_L0,cellTubules_L1,cellTubules_L2,cellTubules_L3};
