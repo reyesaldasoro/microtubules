@@ -39,6 +39,7 @@ cellBody_L_CompleteD    = imdilate(cellBody_L_Complete,ones(35));
 
 %% tubule allocation
 % There are several ways in which the tubules can be allocated:
+% 0) allocate a label to each tubule separately
 % 1) allocate to the one that belongs the most, i.e. closest to the cell
 % 2) allocate a new class of the sum of the classes when overlap
 % 3) allocate as cell/contact/no cell
