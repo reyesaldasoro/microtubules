@@ -34,7 +34,7 @@ numTimePoints       =size(dataIn,4);
 %% Segment with the new process
 
 % Select one time point
-k=98;
+k=1;
 % Each of these lines will perform a process and it is given by the name of the file.
 % Times are calculated but these can be ignored or removed.
 
