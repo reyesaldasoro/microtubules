@@ -28,13 +28,14 @@ end
 % Otherwise, if they have already been saved as a 4-D matrix, just read
 load 2012_11_20_3
 
-% The number of timepoints is required later
-numTimePoints       =size(dataIn,4);
+
     
 %% Segment with the new process
 
+% The number of timepoints is required later
+numTimePoints       =size(dataIn,4);
 % Select one time point
-k=1;
+k=11;
 % Each of these lines will perform a process and it is given by the name of the file.
 % Times are calculated but these can be ignored or removed.
 
