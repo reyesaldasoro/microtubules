@@ -25,8 +25,14 @@ end
 %dataIn =readMTIFF('datasets/pair1.tif');
 %dataIn =readMTIFF('datasets/2012_11_20_3.tif');
 
+% If the data is stored with one tiff as red and one as green, then they are
+% converted with this code
+%[dataIn]=readMTIFF_G_R('/Users/ccr22/OneDrive - City, University of London/Acad/Research/KCL/BrianStramer/SingleCells/Control_ClipGFPRS_031018_3-1.tif');
+
 % Otherwise, if they have already been saved as a 4-D matrix, just read
-load 2012_11_20_3
+%load 2012_11_20_3
+load('/Users/ccr22/OneDrive - City, University of London/Acad/Research/KCL/BrianStramer/SingleCells/Control_ClipGFPRS_031018_3-1.mat')
+%load('/Users/ccr22/OneDrive - City, University of London/Acad/Research/KCL/BrianStramer/SingleCells/Control_ClipGFPRS_031018_1-2.mat')
 
 
     
@@ -35,7 +41,7 @@ load 2012_11_20_3
 % The number of timepoints is required later
 numTimePoints       =size(dataIn,4);
 % Select one time point
-k=11;
+k=1;
 % Each of these lines will perform a process and it is given by the name of the file.
 % Times are calculated but these can be ignored or removed.
 
@@ -156,7 +162,11 @@ for k=1:numTimePoints
     F(k) = getframe(h0);
 end
 %% Write the video
-v = VideoWriter('Tubules_2012_11_20_3.mp4', 'MPEG-4');
+%v = VideoWriter('Tubules_2012_11_20_3.mp4', 'MPEG-4');
+%v = VideoWriter('Control_ClipGFPRS_031018_1-2.mp4', 'MPEG-4');
+v = VideoWriter('Control_ClipGFPRS_031018_3-1.mp4', 'MPEG-4');
+
+
 open(v);
 writeVideo(v,F);
 close(v);
